@@ -8,7 +8,7 @@
 #define N 2010
 
 int threads, processors, max_threads;
-int threshold = 50;
+int threshold = 20;
 
 typedef struct Edge_struct{
     int a, b;
@@ -16,7 +16,9 @@ typedef struct Edge_struct{
 } Edge;
 
 int compare_by_weight(Edge* a, Edge* b){
-    return a->w < b->w;
+    if (a->w != b->w) return a->w < b->w;
+    if (a->a != b->a) return a->a < b->a;
+    return a->b < b->b;
 }
 int compare_lexicographically(Edge* a, Edge* b){
     if (a->a != b->a) return a->a < b->a;
@@ -24,7 +26,8 @@ int compare_lexicographically(Edge* a, Edge* b){
 }
 
 void merge(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)) {
-    Edge *temp = malloc((r - l + 1) * sizeof(Edge));
+    // Edge *temp = malloc((r - l + 1) * sizeof(Edge));
+    Edge temp[r - l + 1];
     int cur = 0;
     int m = (l + r) / 2;
     int lcur = l, rcur = m + 1;
@@ -44,7 +47,7 @@ void merge(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)) {
     for (int i=l;i<=r;i++){
         ar[i] = temp[i - l];
     }
-    free (temp);
+    // free (temp);
 }
 
 void insertion_sort(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)) {
@@ -119,7 +122,7 @@ void make_set(int a, int b){
 int main(){
 
     FILE *input, *output; 
-    input = freopen("input1.txt", "r", stdin); 
+    input = freopen("../bigtc1.in", "r", stdin); 
 
     fscanf(input, "%d", &n);
     init();
@@ -163,12 +166,12 @@ int main(){
     merge_sort_parallel(tree_edges, 0, id - 1, &compare_lexicographically, threads);
     // merge_sort_serial(tree_edges, 0, id - 1, &compare_lexicographically);
 
-    clock_t interval = clock() - start;
+    clock_t end = clock();
 
-    int exec_time = interval * 1000 / CLOCKS_PER_SEC;
+    double exec_time = (end - start) / (0.001 * CLOCKS_PER_SEC);
 
     output = freopen("output.out", "w", stdout); 
-    printf("Waktu eksekusi: %d ms\n", exec_time);
+    printf("Waktu eksekusi: %.3f ms\n", exec_time);
     printf("%ld\n", ans);
     for (int i=0;i<id;i++){
         printf("%d-%d\n", tree_edges[i].a, tree_edges[i].b);
