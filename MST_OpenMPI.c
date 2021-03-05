@@ -5,7 +5,7 @@
 
 #define MAX_PROCESS 128
 
-/* TEST CASE:
+/* SAMPLE TEST CASE:
 5
 -1  2  6 -1 -1
  2 -1  4  1 -1
@@ -26,6 +26,8 @@ long *par, *sz;
 int world_size;
 int world_rank;
 int parent_rank[MAX_PROCESS];
+long long ans = 0;
+long id = 0;
 
 int compare_by_weight(Edge* a, Edge* b){
     if (a->w != b->w) return a->w < b->w;
@@ -164,8 +166,6 @@ int main(int argc, char** argv) {
             }
         }
         sort_edges(edges, m, &compare_by_weight, world_size - 1, 0);
-        long long ans = 0;
-        long id = 0;
         for (long i=0;i<m;i++){
             if (find_set(edges[i].a) == find_set(edges[i].b)) continue;
             make_set(edges[i].a, edges[i].b);
@@ -173,10 +173,6 @@ int main(int argc, char** argv) {
             tree_edges[id++] = edges[i];
         }
         sort_edges(tree_edges, id, &compare_lexicographically, world_size - 1, 0);
-        printf("%lld\n", ans);
-        for (long i=0;i<id;i++){
-            printf("%ld-%ld\n", tree_edges[i].a, tree_edges[i].b);
-        }
         free(par);
         free(sz);
         free(edges);
@@ -227,7 +223,14 @@ int main(int argc, char** argv) {
         }
     }
     MPI_Finalize();
-    clock_t end_time = clock();
-    double time_spent = (end_time - begin_time) / (0.001 * CLOCKS_PER_SEC);
-    if (world_rank == 0) printf("Waktu Eksekusi: %.2f ms\n", time_spent);
+    if (world_rank == 0){
+        clock_t end_time = clock();
+        double time_spent = (end_time - begin_time) / (0.001 * CLOCKS_PER_SEC);
+
+        printf("%lld\n", ans);
+        for (long i=0;i<id;i++){
+            printf("%ld-%ld\n", tree_edges[i].a, tree_edges[i].b);
+        }
+        printf("Waktu Eksekusi: %.2f ms\n", time_spent);
+    }
 }

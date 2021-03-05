@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #define N 100010
 
@@ -8,13 +9,14 @@ typedef struct Edge_struct{
 } Edge;
 
 int compare_by_weight(Edge* a, Edge* b){
-    return a->w < b->w;
+    if (a->w != b->w) return a->w < b->w;
+    if (a->a != b->a) return a->a < b->a;
+    return a->b < b->b;
 }
 int compare_lexicographically(Edge* a, Edge* b){
     if (a->a != b->a) return a->a < b->a;
     return a->b < b->b;
 }
-
 void sort_edges(Edge* ar, long l, long r, int (*comparator)(Edge*, Edge*)){
     if (l == r) return;
     long m = (l + r) / 2;
@@ -43,8 +45,8 @@ void sort_edges(Edge* ar, long l, long r, int (*comparator)(Edge*, Edge*)){
 }
 
 long n, m;
-Edge edges[N * 2];
-Edge tree_edges[N * 2];
+Edge edges[N * 10];
+Edge tree_edges[N];
 long par[N], sz[N];
 void init(){
     for (long i=1;i<=n;i++){
@@ -71,20 +73,20 @@ void make_set(long a, long b){
 }
 
 int main(){
-    scanf("%ld %ld", &n, &m);
+    clock_t begin_time = clock();
+    scanf("%ld", &n);
+    m = 0;
     init();
-    for (long i=0;i<m;i++){
-        long a, b;
-        long w;
-        scanf("%ld %ld %ld", &a, &b, &w);
-        if (a > b){
-            long c = a;
-            a = b;
-            b = c;
+    for (long i=0;i<n;i++){
+        for (long j=0;j<n;j++){
+            long w;
+            scanf("%ld", &w);
+            if (j > i && w != -1){
+                edges[m].a = i;
+                edges[m].b = j;
+                edges[m++].w = w;
+            }
         }
-        edges[i].a = a;
-        edges[i].b = b;
-        edges[i].w = w;
     }
     sort_edges(edges, 0, m - 1, &compare_by_weight);
     long ans = 0;
@@ -96,8 +98,12 @@ int main(){
         tree_edges[id++] = edges[i];
     }
     sort_edges(tree_edges, 0, id - 1, &compare_lexicographically);
+    clock_t end_time = clock();
+    double time_spent = (end_time - begin_time) / (0.001 * CLOCKS_PER_SEC);
+
     printf("%ld\n", ans);
     for (long i=0;i<id;i++){
         printf("%ld-%ld\n", tree_edges[i].a, tree_edges[i].b);
     }
+    printf("Waktu Eksekusi: %.2f ms\n", time_spent);
 }
