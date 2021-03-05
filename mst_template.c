@@ -3,7 +3,7 @@
 #define N 100010
 
 typedef struct Edge_struct{
-    int a, b;
+    long a, b;
     long w;
 } Edge;
 
@@ -15,15 +15,15 @@ int compare_lexicographically(Edge* a, Edge* b){
     return a->b < b->b;
 }
 
-void sort_edges(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)){
+void sort_edges(Edge* ar, long l, long r, int (*comparator)(Edge*, Edge*)){
     if (l == r) return;
-    int m = (l + r) / 2;
+    long m = (l + r) / 2;
     sort_edges(ar, l, m, comparator);
     sort_edges(ar, m + 1, r, comparator);
 
     Edge temp[r - l + 1];
-    int cur = 0;
-    int lcur = l, rcur = m + 1;
+    long cur = 0;
+    long lcur = l, rcur = m + 1;
     while (lcur <= m && rcur <= r){
         if (comparator(&ar[lcur], &ar[rcur])){//ar[lcur].w < ar[rcur].w){
             temp[cur++] = ar[lcur++];
@@ -37,32 +37,32 @@ void sort_edges(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)){
     while (rcur <= r){
         temp[cur++] = ar[rcur++];
     }
-    for (int i=l;i<=r;i++){
+    for (long i=l;i<=r;i++){
         ar[i] = temp[i - l];
     }
 }
 
-int n, m;
+long n, m;
 Edge edges[N * 2];
 Edge tree_edges[N * 2];
-int par[N], sz[N];
+long par[N], sz[N];
 void init(){
-    for (int i=1;i<=n;i++){
+    for (long i=1;i<=n;i++){
         par[i] = i;
         sz[i] = 1;
     }
 }
-int find_set(int a){
+long find_set(long a){
     if (par[a] == a) return a;
     par[a] = find_set(par[a]);
     return par[a];
 }
-void make_set(int a, int b){
+void make_set(long a, long b){
     a = find_set(a);
     b = find_set(b);
     if (a == b) return;
     if (sz[a] < sz[b]){
-        int c = a;
+        long c = a;
         a = b;
         b = c;
     }
@@ -71,14 +71,14 @@ void make_set(int a, int b){
 }
 
 int main(){
-    scanf("%d %d", &n, &m);
+    scanf("%ld %ld", &n, &m);
     init();
-    for (int i=0;i<m;i++){
-        int a, b;
+    for (long i=0;i<m;i++){
+        long a, b;
         long w;
-        scanf("%d %d %ld", &a, &b, &w);
+        scanf("%ld %ld %ld", &a, &b, &w);
         if (a > b){
-            int c = a;
+            long c = a;
             a = b;
             b = c;
         }
@@ -88,8 +88,8 @@ int main(){
     }
     sort_edges(edges, 0, m - 1, &compare_by_weight);
     long ans = 0;
-    int id = 0;
-    for (int i=0;i<m;i++){
+    long id = 0;
+    for (long i=0;i<m;i++){
         if (find_set(edges[i].a) == find_set(edges[i].b)) continue;
         make_set(edges[i].a, edges[i].b);
         ans += edges[i].w;
@@ -97,7 +97,7 @@ int main(){
     }
     sort_edges(tree_edges, 0, id - 1, &compare_lexicographically);
     printf("%ld\n", ans);
-    for (int i=0;i<id;i++){
-        printf("%d-%d\n", tree_edges[i].a, tree_edges[i].b);
+    for (long i=0;i<id;i++){
+        printf("%ld-%ld\n", tree_edges[i].a, tree_edges[i].b);
     }
 }
