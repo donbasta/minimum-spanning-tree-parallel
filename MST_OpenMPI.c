@@ -26,8 +26,11 @@ long *par, *sz;
 int world_size;
 int world_rank;
 int parent_rank[MAX_PROCESS];
+
 int compare_by_weight(Edge* a, Edge* b){
-    return a->w < b->w;
+    if (a->w != b->w) return a->w < b->w;
+    if (a->a != b->a) return a->a < b->a;
+    return a->b < b->b;
 }
 int compare_lexicographically(Edge* a, Edge* b){
     if (a->a != b->a) return a->a < b->a;
