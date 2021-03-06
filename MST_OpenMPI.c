@@ -14,6 +14,8 @@
 -1 -1  1  1 -1
 */
 
+// ssh -i ./43 kel43@34.239.177.66
+
 typedef struct Edge_struct{
     long a, b;
     long w;
@@ -39,58 +41,49 @@ int compare_lexicographically(Edge* a, Edge* b){
     return a->b < b->b;
 }
 void sort_edges(Edge* ar, long sz, int (*comparator)(Edge*, Edge*), int mx_rank, int send_to_parent){
-    if (sz == 1){ 
-        if (send_to_parent){
-            long data[sz * 3];
-            for (long i=0;i<sz;i++){
-                data[i * 3 + 0] = ar[i].a;
-                data[i * 3 + 1] = ar[i].b;
-                data[i * 3 + 2] = ar[i].w;
-            }
-            MPI_Send(&data, sz * 3, MPI_LONG, parent_rank[world_rank], 99, MPI_COMM_WORLD);
-        }
-        return;
-    }
-    long m = sz / 2;
-    int ch_rank = world_rank + (mx_rank - world_rank + 1) / 2;
+    // threshold
+    if (sz > 1){
+        long m = sz / 2;
+        int ch_rank = world_rank + (mx_rank - world_rank + 1) / 2;
 
-    sort_edges(ar, m, comparator, ch_rank - 1, 0);
-    if (ch_rank > world_rank){
-        MPI_Send(&mx_rank, 1, MPI_INT, ch_rank, 0, MPI_COMM_WORLD);
-        long data[(sz - m) * 3];
-        for (long i=m;i<sz;i++){
-            data[(i - m) * 3 + 0] = ar[i].a;
-            data[(i - m) * 3 + 1] = ar[i].b;
-            data[(i - m) * 3 + 2] = ar[i].w;
-        }
-        MPI_Send(&data, (sz - m) * 3, MPI_LONG, ch_rank, 1, MPI_COMM_WORLD);
-        MPI_Recv(&data, (sz - m) * 3, MPI_LONG, ch_rank, 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        for (long i=m;i<sz;i++){
-            ar[i].a = data[(i - m) * 3 + 0];
-            ar[i].b = data[(i - m) * 3 + 1];
-            ar[i].w = data[(i - m) * 3 + 2];
-        }
-    } else{
-        sort_edges(ar + m, sz - m, comparator, ch_rank, 0);
-    }
-    Edge temp[sz];
-    long cur = 0;
-    long lcur = 0, rcur = m;
-    while (lcur < m && rcur < sz){
-        if (comparator(&ar[lcur], &ar[rcur])){
-            temp[cur++] = ar[lcur++];
+        sort_edges(ar, m, comparator, ch_rank - 1, 0);
+        if (ch_rank > world_rank){
+            MPI_Send(&mx_rank, 1, MPI_INT, ch_rank, 0, MPI_COMM_WORLD);
+            long data[(sz - m) * 3];
+            for (long i=m;i<sz;i++){
+                data[(i - m) * 3 + 0] = ar[i].a;
+                data[(i - m) * 3 + 1] = ar[i].b;
+                data[(i - m) * 3 + 2] = ar[i].w;
+            }
+            MPI_Send(&data, (sz - m) * 3, MPI_LONG, ch_rank, 1, MPI_COMM_WORLD);
+            MPI_Recv(&data, (sz - m) * 3, MPI_LONG, ch_rank, 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            for (long i=m;i<sz;i++){
+                ar[i].a = data[(i - m) * 3 + 0];
+                ar[i].b = data[(i - m) * 3 + 1];
+                ar[i].w = data[(i - m) * 3 + 2];
+            }
         } else{
+            sort_edges(ar + m, sz - m, comparator, mx_rank, 0);
+        }
+        Edge temp[sz];
+        long cur = 0;
+        long lcur = 0, rcur = m;
+        while (lcur < m && rcur < sz){
+            if (comparator(&ar[lcur], &ar[rcur])){
+                temp[cur++] = ar[lcur++];
+            } else{
+                temp[cur++] = ar[rcur++];
+            }
+        }
+        while (lcur < m){
+            temp[cur++] = ar[lcur++];
+        }
+        while (rcur < sz){
             temp[cur++] = ar[rcur++];
         }
-    }
-    while (lcur < m){
-        temp[cur++] = ar[lcur++];
-    }
-    while (rcur < sz){
-        temp[cur++] = ar[rcur++];
-    }
-    for (long i=0;i<sz;i++){
-        ar[i] = temp[i];
+        for (long i=0;i<sz;i++){
+            ar[i] = temp[i];
+        }
     }
     if (send_to_parent){
         long data[sz * 3];
