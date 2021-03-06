@@ -24,8 +24,6 @@ int compare_lexicographically(Edge* a, Edge* b){
 }
 
 void merge(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*), Edge* temp) {
-    // Edge *temp = malloc((r - l + 1) * sizeof(Edge));
-    // Edge temp[r - l + 1];
     int cur = l;
     int m = (l + r) / 2;
     int lcur = l, rcur = m + 1;
@@ -45,7 +43,6 @@ void merge(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*), Edge* temp) 
     for (int i=l;i<=r;i++){
         ar[i] = temp[i];
     }
-    // free (temp);
 }
 
 void insertion_sort(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)) {
