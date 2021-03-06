@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 #ifdef _OPENMP
     #include <omp.h>
 #endif
-
-#define N 2010
 
 int threads, processors, max_threads;
 int threshold = 20;
@@ -91,21 +89,30 @@ void merge_sort_parallel(Edge* ar, int l, int r, int (*comparator)(Edge*, Edge*)
     merge(ar, l, r, comparator);
 }
 
-int n;
-Edge edges[N * N];
-Edge tree_edges[N * N];
-int par[N], sz[N];
+int n, m;
+Edge *edges;
+Edge *tree_edges;
+int *par, *sz;
+
+
 void init(){
+	par = (int*) malloc(n * sizeof(int));
+    sz = (int*) malloc(n * sizeof(int));
+    edges = (Edge*) malloc(n * n * sizeof(Edge));
+    tree_edges = (Edge*) malloc(n * sizeof(Edge));
+
     for (int i=1;i<=n;i++){
         par[i] = i;
         sz[i] = 1;
     }
 }
+
 int find_set(int a){
     if (par[a] == a) return a;
     par[a] = find_set(par[a]);
     return par[a];
 }
+
 void make_set(int a, int b){
     a = find_set(a);
     b = find_set(b);
@@ -119,44 +126,47 @@ void make_set(int a, int b){
     sz[a] += sz[b];
 }
 
-int main(){
+int main(int argc, char** argv){
 
     FILE *input, *output; 
-    input = freopen("../bigtc1.in", "r", stdin); 
+    
+    // get input filename
+    char* filename = argv[1];
+    
+    input = freopen(filename, "r", stdin); 
 
     fscanf(input, "%d", &n);
     init();
-    int itr = 0;
-    for (int i=1;i<=n;i++){
-        for (int j=1;j<=n;j++){
-            int w;
-            fscanf(input, "%d", &w);
+    m = 0;
+    for (int i=0;i<n;i++){
+        for (int j=0;j<n;j++){
+            long w;
+            fscanf(input, "%ld", &w);
             if (w != -1 && i < j) {
-                edges[itr].a = i;
-                edges[itr].b = j;
-                edges[itr].w = w;
-                itr++;
+                edges[m].a = i;
+                edges[m].b = j;
+                edges[m++].w = w;
             }
         }
     }
 
     threads = 8;
-    processors = omp_get_num_procs();
-    max_threads = omp_get_max_threads();
+    //processors = omp_get_num_procs();
+    //max_threads = omp_get_max_threads();
 
-    printf("Using %d threads\n", threads);
-    printf("Num of available processors: %d\n", processors);
-    printf("Max num of threads: %d\n", max_threads);
+    //printf("Using %d threads\n", threads);
+    //printf("Num of available processors: %d\n", processors);
+    //printf("Max num of threads: %d\n", max_threads);
 
     clock_t start = clock();
 
     omp_set_nested(1);
-    merge_sort_parallel(edges, 0, itr - 1, &compare_by_weight, threads);
-    // merge_sort_serial(edges, 0, itr - 1, &compare_by_weight);
+    merge_sort_parallel(edges, 0, m - 1, &compare_by_weight, threads);
+    // merge_sort_serial(edges, 0, m - 1, &compare_by_weight);
 
     long ans = 0;
     int id = 0;
-    for (int i=0;i<itr;i++){
+    for (int i=0;i<m;i++){
         if (find_set(edges[i].a) == find_set(edges[i].b)) continue;
         make_set(edges[i].a, edges[i].b);
         ans += edges[i].w;
@@ -171,7 +181,7 @@ int main(){
     double exec_time = (end - start) / (0.001 * CLOCKS_PER_SEC);
 
     output = freopen("output.out", "w", stdout); 
-    printf("Waktu eksekusi: %.3f ms\n", exec_time);
+    //printf("Waktu eksekusi: %.3f ms\n", exec_time);
     printf("%ld\n", ans);
     for (int i=0;i<id;i++){
         printf("%d-%d\n", tree_edges[i].a, tree_edges[i].b);
@@ -179,4 +189,9 @@ int main(){
 
     fclose(input);
     fclose(output);
+
+    // free(par);
+    // free(sz);
+    // free(edges);
+    // free(tree_edges);
 }
