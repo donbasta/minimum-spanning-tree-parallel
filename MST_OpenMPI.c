@@ -185,14 +185,14 @@ int main(int argc, char** argv) {
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
             // long data[sz];
-            Edge edges1[sz / 3];
+            Edge temp[sz / 3];
             MPI_Recv(&data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i=0;i<sz / 3;i++){
-                edges1[i].a = data[(i - m) * 3 + 0];
-                edges1[i].b = data[(i - m) * 3 + 1];
-                edges1[i].w = data[(i - m) * 3 + 2];
+                temp[i].a = data[(i - m) * 3 + 0];
+                temp[i].b = data[(i - m) * 3 + 1];
+                temp[i].w = data[(i - m) * 3 + 2];
             }
-            sort_edges(edges1, sz / 3, &compare_by_weight, mx_rank, 1);
+            sort_edges(temp, sz / 3, &compare_by_weight, mx_rank, 1);
         }
         // sort lexicographically
         mx_rank = 0;
@@ -203,14 +203,14 @@ int main(int argc, char** argv) {
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
             // long data[sz];
-            Edge edges1[sz / 3];
+            Edge temp[sz / 3];
             MPI_Recv(&data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i=0;i<sz / 3;i++){
-                edges1[i].a = data[(i - m) * 3 + 0];
-                edges1[i].b = data[(i - m) * 3 + 1];
-                edges1[i].w = data[(i - m) * 3 + 2];
+                temp[i].a = data[(i - m) * 3 + 0];
+                temp[i].b = data[(i - m) * 3 + 1];
+                temp[i].w = data[(i - m) * 3 + 2];
             }
-            sort_edges(edges1, sz / 3, &compare_lexicographically, mx_rank, 1);
+            sort_edges(temp, sz / 3, &compare_lexicographically, mx_rank, 1);
         }
     }
     for (int i=0;i<world_size;i++){
