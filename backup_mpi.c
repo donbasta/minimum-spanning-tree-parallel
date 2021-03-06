@@ -5,7 +5,6 @@
 
 #define MAX_PROCESS 128
 #define MAXN 9000000
-#define N 100000
 
 /* SAMPLE TEST CASE:
 5
@@ -24,9 +23,9 @@ typedef struct Edge_struct{
 } Edge;
 
 long n, m;
-Edge edges[MAXN];
-Edge tree_edges[N];
-long par[N], sz[N];
+Edge *edges;
+Edge *tree_edges;
+long *par, *sz;
 int world_size;
 int world_rank;
 int parent_rank[MAX_PROCESS];
@@ -101,10 +100,10 @@ void sort_edges(Edge* ar, long sz, int (*comparator)(Edge*, Edge*), int mx_rank,
     }
 }
 void init(){
-    // par = (long*) malloc(n * sizeof(long));
-    // sz = (long*) malloc(n * sizeof(long));
-    // edges = (Edge*) malloc(n * n * sizeof(Edge));
-    // tree_edges = (Edge*) malloc(n * sizeof(Edge));
+    par = (long*) malloc(n * sizeof(long));
+    sz = (long*) malloc(n * sizeof(long));
+    edges = (Edge*) malloc(n * n * sizeof(Edge));
+    tree_edges = (Edge*) malloc(n * sizeof(Edge));
 
     for (long i=0;i<n;i++){
         par[i] = i;
@@ -171,10 +170,10 @@ int main(int argc, char** argv) {
             tree_edges[id++] = edges[i];
         }
         sort_edges(tree_edges, id, &compare_lexicographically, world_size - 1, 0);
-        // free(par);
-        // free(sz);
-        // free(edges);
-        // free(tree_edges);
+        free(par);
+        free(sz);
+        free(edges);
+        free(tree_edges);
     } else{
         // sort by weight
         int mx_rank = 0;
