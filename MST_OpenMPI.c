@@ -31,8 +31,6 @@ int world_rank;
 int parent_rank[MAX_PROCESS];
 long long ans = 0;
 long id = 0;
-// long *data;
-// Edge *temp;
 
 int compare_by_weight(Edge* a, Edge* b){
     if (a->w != b->w) return a->w < b->w;
@@ -172,10 +170,6 @@ int main(int argc, char** argv) {
             tree_edges[id++] = edges[i];
         }
         sort_edges(tree_edges, id, &compare_lexicographically, world_size - 1, 0);
-        free(par);
-        free(sz);
-        free(edges);
-        free(tree_edges);
     } else{
         // sort by weight
         int mx_rank = 0;
@@ -238,4 +232,8 @@ int main(int argc, char** argv) {
         }
         printf("Waktu Eksekusi: %.2f ms\n", time_spent);
     }
+    free(par);
+    free(sz);
+    free(edges);
+    free(tree_edges);
 }
