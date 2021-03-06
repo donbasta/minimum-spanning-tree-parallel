@@ -31,8 +31,8 @@ int world_rank;
 int parent_rank[MAX_PROCESS];
 long long ans = 0;
 long id = 0;
-long *data;
-Edge *temp;
+// long *data;
+// Edge *temp;
 
 int compare_by_weight(Edge* a, Edge* b){
     if (a->w != b->w) return a->w < b->w;
@@ -52,7 +52,7 @@ void sort_edges(Edge* ar, long sz, int (*comparator)(Edge*, Edge*), int mx_rank,
         sort_edges(ar, m, comparator, ch_rank - 1, 0);
         if (ch_rank > world_rank){
             MPI_Send(&mx_rank, 1, MPI_INT, ch_rank, 0, MPI_COMM_WORLD);
-            data = (long*) malloc((sz - m) * 3 * sizeof(long));
+            long *data = (long*) malloc((sz - m) * 3 * sizeof(long));
             for (long i=m;i<sz;i++){
                 data[(i - m) * 3 + 0] = ar[i].a;
                 data[(i - m) * 3 + 1] = ar[i].b;
@@ -69,7 +69,7 @@ void sort_edges(Edge* ar, long sz, int (*comparator)(Edge*, Edge*), int mx_rank,
         } else{
             sort_edges(ar + m, sz - m, comparator, mx_rank, 0);
         }
-        temp = (Edge*) malloc(sz * sizeof(Edge));
+        Edge *temp = (Edge*) malloc(sz * sizeof(Edge));
         long cur = 0;
         long lcur = 0, rcur = m;
         while (lcur < m && rcur < sz){
@@ -91,7 +91,7 @@ void sort_edges(Edge* ar, long sz, int (*comparator)(Edge*, Edge*), int mx_rank,
         free(temp);
     }
     if (send_to_parent){
-        data = (long*) malloc(sz * 3 * sizeof(long));
+        long *data = (long*) malloc(sz * 3 * sizeof(long));
         for (long i=0;i<sz;i++){
             data[i * 3 + 0] = ar[i].a;
             data[i * 3 + 1] = ar[i].b;
@@ -185,8 +185,8 @@ int main(int argc, char** argv) {
             MPI_Probe(parent_rank[world_rank], 1, MPI_COMM_WORLD, &status);
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
-            data = (long*) malloc(sz * sizeof(long));
-            temp = (Edge*) malloc((sz / 3) * sizeof(Edge));
+            long *data = (long*) malloc(sz * sizeof(long));
+            Edge *temp = (Edge*) malloc((sz / 3) * sizeof(Edge));
             MPI_Recv(data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             fflush(stdout);
             for (int i=0;i<sz / 3;i++){
@@ -207,8 +207,8 @@ int main(int argc, char** argv) {
             MPI_Probe(parent_rank[world_rank], 1, MPI_COMM_WORLD, &status);
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
-            data = (long*) malloc(sz * sizeof(long));
-            temp = (Edge*) malloc(sz / 3 * sizeof(Edge));
+            long *data = (long*) malloc(sz * sizeof(long));
+            Edge *temp = (Edge*) malloc((sz / 3) * sizeof(Edge));
             MPI_Recv(data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i=0;i<sz / 3;i++){
                 temp[i].a = data[i * 3 + 0];
