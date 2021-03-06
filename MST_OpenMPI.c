@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
             // long data[sz];
-            Edge temp[sz / 3];
+            // Edge temp[sz / 3];
             MPI_Recv(&data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i=0;i<sz / 3;i++){
                 temp[i].a = data[(i - m) * 3 + 0];
@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
             int sz;
             MPI_Get_count(&status, MPI_LONG, &sz);
             // long data[sz];
-            Edge temp[sz / 3];
+            // Edge temp[sz / 3];
             MPI_Recv(&data, sz, MPI_LONG, parent_rank[world_rank], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             for (int i=0;i<sz / 3;i++){
                 temp[i].a = data[(i - m) * 3 + 0];
